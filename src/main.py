@@ -59,7 +59,7 @@ def ftp_anonymous_login(server):
 def ftp_file(file_path):
 	with open(file_path, 'r') as file:
 		for line in file.readlines(): # Nested For loop to loop through subnet and then each individual IP in it
-			tuple = parse_subnets(line)
+			tuple = parse_subnets(line.strip())
 			for ip in tuple:
 				ftp_anonymous_login(str(ip))
 
