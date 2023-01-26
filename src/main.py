@@ -4,6 +4,12 @@ RED = '\033[1;31;48m'
 WHITE = "\33[0m"
 GREEN = '\033[1;32;48m'
 
+print(f'''\noptic21-{RED}v(1.0){WHITE}
+Author: {RED}Bhairav{WHITE}
+{WHITE}Copyright (c) 2021{WHITE}
+{GREEN}[scan anonymous ftp login]{WHITE}\n''')
+
+
 import ftplib
 import time,optparse,sys,os
 
