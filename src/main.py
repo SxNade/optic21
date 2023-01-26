@@ -13,6 +13,11 @@ Author: {RED}Bhairav{WHITE}
 import ftplib
 import time,optparse,sys,os
 
+# ===== time place holder ====
+t = time.localtime()
+current_time = time.strftime("%H:%M:%S", t)
+
+
 # ================== Function to check existence of file ===============
 def check_file_existence(file_path):
 	if os.path.exists(file_path) == False:
@@ -24,16 +29,18 @@ def check_file_existence(file_path):
 
 # ================= Function to check ftp login ===============
 def ftp_anonymous_login(server):
-	t = time.localtime()
-	current_time = time.strftime("%H:%M:%S", t)
-	f = open(f"{current_time}_.txt", "a")
-	ftp = ftplib.FTP(f'{server}') # note that this will connect to the host with default port of 21
 	try:
+		ftp = ftplib.FTP(f'{server}', timeout=2) # note that this will connect to the host with default port of 21 with default timeout set to 2
 		ftp.login("anonymous", "anonymous") # Check anonymous login credentials
 	except ftplib.error_perm:
 		print(f"[{RED}-{WHITE}] {server}")
+	except TimeoutError:
+		print(f"[{RED}-{WHITE}] {server} 2sec {RED}timeout{WHITE}")
+	except ftplib.error_temp:
+		print(f"[{RED}-{WHITE}] {server} {RED}requires TLS?{WHITE}")
 	else:
 		print(f"[{GREEN}+{WHITE}] {server}")
+		f = open(f"{current_time}_.txt", "a")
 		f.write(f"\n{server}")
 
 
@@ -59,7 +66,9 @@ def main():
 		file_path = options.server_file_path
 		if check_file_existence(file_path):
 			print(f"[{GREEN}+{WHITE}] reading from file..")
-			print(f"[*] successful login IP/domains will be saved to a a:b:c:_.txt in current directory..")
+			print(f"[*] successful login IP/domains will be saved to a a:b:c:_.txt in current directory..\n")
+			ftp_file(file_path)
+
 		else:
 			print(f"[{RED}!{WHITE}] unable to process specified file")
 			sys.exit(0)
