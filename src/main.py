@@ -66,7 +66,7 @@ def main():
 		file_path = options.server_file_path
 		if check_file_existence(file_path):
 			print(f"[{GREEN}+{WHITE}] reading from file..")
-			print(f"[*] successful login IP/domains will be saved to a a:b:c:_.txt in current directory..\n")
+			print(f"[*] successful login IP/domains will be saved to {current_time} in current directory..\n")
 			ftp_file(file_path)
 
 		else:
