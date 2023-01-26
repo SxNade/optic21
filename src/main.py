@@ -4,14 +4,14 @@ RED = '\033[1;31;48m'
 WHITE = "\33[0m"
 GREEN = '\033[1;32;48m'
 
-print(f'''\noptic21-{RED}v(1.0){WHITE}
+print(f'''\noptic21-{RED}v(1.1){WHITE}
 Author: {RED}Bhairav{WHITE}
 {WHITE}Copyright (c) 2023{WHITE}
 {GREEN}[scan anonymous ftp login]{WHITE}\n''')
 
 
 import ftplib
-import time,optparse,sys,os
+import time,optparse,sys,os,ipaddress
 
 # ===== time place holder ====
 t = time.localtime()
@@ -27,6 +27,13 @@ def check_file_existence(file_path):
 
 #============== Write to file found servers =========== 
 
+#============== parse subnets/IP ===============
+#======== we will do parsing to save it in a tuple, tuple is more memory efficent===
+
+def parse_subnets(subnet):
+	ip_tuple = tuple(ipaddress.ip_network(subnet, False).hosts())
+	return ip_tuple
+
 # ================= Function to check ftp login ===============
 def ftp_anonymous_login(server):
 	try:
@@ -38,6 +45,10 @@ def ftp_anonymous_login(server):
 		print(f"[{RED}-{WHITE}] {server} 5sec {RED}timeout{WHITE}")
 	except ftplib.error_temp:
 		print(f"[{RED}-{WHITE}] {server} {RED}requires TLS?{WHITE}")
+	except ConnectionRefusedError:
+		print(f"[{RED}-{WHITE}] {server} {RED}connection refused!{WHITE}")
+	except OSError:
+		print(f"[{RED}-{WHITE}] {server} {RED}error!{WHITE}")
 	else:
 		print(f"[{GREEN}+{WHITE}] {server}")
 		f = open(f"{current_time}_.txt", "a")
@@ -47,13 +58,15 @@ def ftp_anonymous_login(server):
 # =================== Function to test from file list ========================= 
 def ftp_file(file_path):
 	with open(file_path, 'r') as file:
-		for line in file.readlines():
-			ftp_anonymous_login(line.strip())
+		for line in file.readlines(): # Nested For loop to loop through subnet and then each individual IP in it
+			tuple = parse_subnets(line)
+			for ip in tuple:
+				ftp_anonymous_login(str(ip))
 
 # =========================== Parsing options below ===========================
 
 parser = optparse.OptionParser("\n./main.py [-h or --help] [-f or --file]=<file-path-with-IPs or Domains For FTP servers, one on each line> [-l or --ftp=domain or IP of ftp server]")
-parser.add_option("-f", "--file", dest="server_file_path", type='string', help="specify the file containing server IP/domains")
+parser.add_option("-f", "--file", dest="server_file_path", type='string', help="specify the file containing server IP/domains or subnets")
 parser.add_option("-t", "--ftp", dest="ftp_server_addr", type='string', help="specify a single ftp server")
 (options, args) = parser.parse_args()
 
@@ -73,6 +86,7 @@ def main():
 			print(f"[{RED}!{WHITE}] unable to process specified file")
 			sys.exit(0)
 	elif options.ftp_server_addr != None:
-		ftp_anonymous_login(options.ftp_server_addr)
-
+		tuple = parse_subnets(options.ftp_server_addr)
+		for ip in tuple:
+			ftp_anonymous_login(str(ip))
 main()
