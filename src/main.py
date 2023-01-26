@@ -30,7 +30,7 @@ def check_file_existence(file_path):
 # ================= Function to check ftp login ===============
 def ftp_anonymous_login(server):
 	try:
-		ftp = ftplib.FTP(f'{server}', timeout=2) # note that this will connect to the host with default port of 21 with default timeout set to 2
+		ftp = ftplib.FTP(f'{server}', timeout=3) # note that this will connect to the host with default port of 21 with default timeout set to 2
 		ftp.login("anonymous", "anonymous") # Check anonymous login credentials
 	except ftplib.error_perm:
 		print(f"[{RED}-{WHITE}] {server}")
